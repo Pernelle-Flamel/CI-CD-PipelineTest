@@ -29,9 +29,12 @@ jobs:
             touch requirements.txt
           fi
 
-      - name: Install Dependencies
+      - name: Set up Virtual Environment and Install Dependencies
         run: |
-          python -m venv venv
+          if [ ! -d "venv" ]; then
+            echo "Creating virtual environment."
+            python -m venv venv
+          fi
           source venv/bin/activate
           pip install -r requirements.txt || echo "Some dependencies failed to install."
 
@@ -42,18 +45,26 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Ensure Python file exists
+      - name: Ensure Virtual Environment Exists
         run: |
-          if [ ! -f "myprogram.py" ]; then
-            echo "Creating a blank myprogram.py as it does not exist."
-            touch myprogram.py
+          if [ ! -d "venv" ]; then
+            echo "Creating virtual environment."
+            python -m venv venv
+          fi
+          source venv/bin/activate
+
+      - name: Ensure main.py Exists
+        run: |
+          if [ ! -f "main.py" ]; then
+            echo "Creating a blank main.py as it does not exist."
+            touch main.py
           fi
 
       - name: Run Bandit for Security Analysis on Python
         run: |
           source venv/bin/activate
           pip install --quiet bandit || echo "Failed to install Bandit."
-          bandit -r myprogram.py || echo "Bandit scan found issues."
+          bandit -r main.py || echo "Bandit scan found issues."
 
       - name: Run Safety for Dependency Vulnerability Check
         run: |
@@ -65,7 +76,7 @@ jobs:
         run: |
           source venv/bin/activate
           pip install --quiet pylint || echo "Failed to install Pylint."
-          pylint myprogram.py || echo "Pylint found issues."
+          pylint main.py || echo "Pylint found issues."
 
   compile_to_c:
     runs-on: ubuntu-latest
@@ -74,7 +85,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Ensure Cython is installed
+      - name: Ensure Virtual Environment Exists
+        run: |
+          if [ ! -d "venv" ]; then
+            echo "Creating virtual environment."
+            python -m venv venv
+          fi
+          source venv/bin/activate
+
+      - name: Ensure Cython is Installed
         run: |
           source venv/bin/activate
           pip show cython || pip install cython
@@ -82,13 +101,13 @@ jobs:
       - name: Compile Python Code to C using Cython
         run: |
           source venv/bin/activate
-          cython --embed -o myprogram.c myprogram.py || echo "Failed to compile Python to C."
+          cython --embed -o main.c main.py || echo "Failed to compile Python to C."
 
-      - name: Verify or Create C file
+      - name: Verify or Create C File
         run: |
-          if [ ! -f "myprogram.c" ]; then
-            echo "Creating a blank myprogram.c as it does not exist."
-            touch myprogram.c
+          if [ ! -f "main.c" ]; then
+            echo "Creating a blank main.c as it does not exist."
+            touch main.c
           fi
 
   static_analysis_c:
@@ -98,10 +117,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
+      - name: Ensure Virtual Environment Exists
+        run: |
+          if [ ! -d "venv" ]; then
+            echo "Creating virtual environment."
+            python -m venv venv
+          fi
+          source venv/bin/activate
+
       - name: Run Cppcheck for Static Analysis on Generated C Code
         run: |
           if command -v cppcheck >/dev/null 2>&1; then
-            cppcheck --enable=all --inconclusive --error-exitcode=1 myprogram.c || echo "Cppcheck found issues."
+            cppcheck --enable=all --inconclusive --error-exitcode=1 main.c || echo "Cppcheck found issues."
           else
             echo "Cppcheck not installed, skipping."
           fi
@@ -109,7 +136,7 @@ jobs:
       - name: Run Flawfinder for Security Analysis on Generated C Code
         run: |
           sudo apt-get update -y && sudo apt-get install -y flawfinder || echo "Failed to install Flawfinder."
-          flawfinder myprogram.c || echo "Flawfinder found issues."
+          flawfinder main.c || echo "Flawfinder found issues."
 
   build_binary:
     runs-on: ubuntu-latest
@@ -118,20 +145,28 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
+      - name: Ensure Virtual Environment Exists
+        run: |
+          if [ ! -d "venv" ]; then
+            echo "Creating virtual environment."
+            python -m venv venv
+          fi
+          source venv/bin/activate
+
       - name: Compile C Code to Binary with GCC
         run: |
-          if [ -f "myprogram.c" ]; then
-            gcc -o myprogram myprogram.c $(python3-config --cflags --ldflags) || echo "Failed to compile binary."
+          if [ -f "main.c" ]; then
+            gcc -o main main.c $(python3-config --cflags --ldflags) || echo "Failed to compile binary."
           else
-            echo "Error: myprogram.c not found! Creating a blank file."
-            touch myprogram.c
+            echo "Error: main.c not found! Creating a blank file."
+            touch main.c
           fi
 
       - name: Verify or Create Binary
         run: |
-          if [ ! -f "myprogram" ]; then
-            echo "Creating a blank myprogram binary as it does not exist."
-            touch myprogram
+          if [ ! -f "main" ]; then
+            echo "Creating a blank main binary as it does not exist."
+            touch main
           fi
 
   push_binary:
@@ -146,8 +181,8 @@ jobs:
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "actions@github.com"
-          if [ -f "myprogram" ]; then
-            git add myprogram
+          if [ -f "main" ]; then
+            git add main
             git commit -m "Add compiled binary" || echo "No changes to commit"
             git push origin main || echo "Binary push skipped to prevent trigger"
           else
