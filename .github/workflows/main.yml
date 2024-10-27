@@ -179,8 +179,6 @@ jobs:
 
       - name: Configure Git and Commit Binary
         run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "actions@github.com"
           if [ -f "main" ]; then
             git add main
             git commit -m "Add compiled binary" || echo "No changes to commit"
