@@ -179,9 +179,6 @@ jobs:
 
       - name: Configure Git and Commit Binary
         run: |
-          if [ -f "main" ]; then
-            git add main
-            git commit -m "Add compiled binary" || echo "No changes to commit"
-            git push origin main || echo "Binary push skipped to prevent trigger"
-          else
-            echo "Binary not found, skipping push."
+          git add main
+          git commit -m "Add compiled binary" || echo "No changes to commit"
+          git push origin main || echo "Binary push skipped to prevent trigger"
