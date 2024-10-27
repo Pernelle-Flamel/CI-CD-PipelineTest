@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/setup-python@v2
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -33,7 +33,7 @@ jobs:
     needs: setup
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/setup-python@v2
 
       - name: Run Bandit for Security Analysis on Python
         run: |
@@ -51,27 +51,27 @@ jobs:
         run: |
           source venv/bin/activate
           pip install pylint
-          pylint myprogram.py
+          pylint main.py
 
   compile_to_c:
     runs-on: ubuntu-latest
     needs: scan_python
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/setup-python@v2
 
       - name: Compile Python Code to C using Cython
         run: |
           source venv/bin/activate
           pip install cython
-          cython --embed -o myprogram.c myprogram.py
+          cython --embed -o main.c main.py
 
   static_analysis_c:
     runs-on: ubuntu-latest
     needs: compile_to_c
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/setup-python@v2
 
       - name: Run Cppcheck for Static Analysis on Generated C Code
         run: |
@@ -81,18 +81,18 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y flawfinder
-          flawfinder myprogram.c
+          flawfinder main.c
 
   build_binary:
     runs-on: ubuntu-latest
     needs: static_analysis_c
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/setup-python@v2
 
       - name: Compile C Code to Binary with GCC
         run: |
-          gcc -o myprogram myprogram.c $(python3-config --cflags --ldflags)
+          gcc -o myprogram main.c $(python3-config --cflags --ldflags)
 
   push_binary:
     runs-on: ubuntu-latest
@@ -100,7 +100,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/setup-python@v2
 
       - name: Add and Commit Binary to Repository
         run: |
