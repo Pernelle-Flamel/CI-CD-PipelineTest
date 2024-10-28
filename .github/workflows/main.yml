@@ -127,3 +127,4 @@ jobs:
             git push origin main || echo "Binary push skipped to prevent trigger"
           else
             echo "Binary not found, skipping push."
+          fi
