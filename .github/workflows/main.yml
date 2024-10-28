@@ -38,14 +38,6 @@ jobs:
           source venv/bin/activate
           pip install -r requirements.txt || echo "Some dependencies failed to install."
 
-      - name: Ensure Virtual Environment Exists
-        run: |
-          if [ ! -d "venv" ]; then
-            echo "Creating virtual environment."
-            python -m venv venv
-          fi
-          source venv/bin/activate
-
       - name: Ensure main.py Exists
         run: |
           if [ ! -f "main.py" ]; then
@@ -55,15 +47,13 @@ jobs:
 
       - name: Run Bandit for Security Analysis on Python
         run: |
-          source venv/bin/activate
           pip install --quiet bandit || echo "Failed to install Bandit."
           bandit -r main.py || echo "Bandit scan found issues."
 
       - name: Run Safety for Dependency Vulnerability Check
         run: |
-          source venv/bin/activate
           pip install --quiet safety || echo "Failed to install Safety."
-          safety check -r requirements.txt || echo "Safety found dependency issues."
+          safety scan -r requirements.txt || echo "Safety scan found dependency issues."
 
       - name: Run Pylint for Code Quality and Style Check on Python
         run: |
@@ -86,6 +76,13 @@ jobs:
           if [ ! -f "main.c" ]; then
             echo "Creating a blank main.c as it does not exist."
             touch main.c
+          fi          
+
+      - name: Install Cppcheck if Not Available
+        run: |
+          if ! command -v cppcheck >/dev/null 2>&1; then
+            echo "Cppcheck not found. Installing..."
+            sudo apt-get update -y && sudo apt-get install -y cppcheck
           fi
 
       - name: Run Cppcheck for Static Analysis on Generated C Code
@@ -117,10 +114,13 @@ jobs:
             touch main
           fi
 
-      - name: Configure Git and Commit Binary
+      - name: Git config
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
+
+      - name: Configure Git and Commit Binary
+        run: |
           if [ -f "main" ]; then
             git add main
             git commit -m "Add compiled binary" || echo "No changes to commit"
