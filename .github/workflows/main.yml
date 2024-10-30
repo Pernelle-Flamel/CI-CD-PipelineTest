@@ -1,5 +1,3 @@
-# .github/workflows/ci-cd.yml
-
 name: Python-to-C CI/CD Pipeline
 
 on:
@@ -45,10 +43,10 @@ jobs:
             touch main.py
           fi
 
-      - name: Run Bandit for Security Analysis on Python
+      - name: Run Semgrep for Security Analysis on Python
         run: |
-          pip install --quiet bandit || echo "Failed to install Bandit."
-          bandit -r main.py || echo "Bandit scan found issues."
+          pip install --quiet semgrep || echo "Failed to install Semgrep."
+          semgrep --config=p/ci main.py || echo "Semgrep scan found issues."
 
       - name: Run Safety for Dependency Vulnerability Check
         run: |
