@@ -50,8 +50,8 @@ jobs:
 
       - name: Run Safety for Dependency Vulnerability Check
         run: |
-          pip install --quiet safety || echo "Failed to install Safety."
-          safety scan -r requirements.txt || echo "Safety scan found dependency issues."
+          python -m pip install pip-audit
+          pip-audit
 
       - name: Run Pylint for Code Quality and Style Check on Python
         run: |
