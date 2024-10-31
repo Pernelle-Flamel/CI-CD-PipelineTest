@@ -99,11 +99,12 @@ jobs:
       - name: Compile C Code to Binary with GCC
         run: |
           if [ -f "main.c" ]; then
-            gcc -o main main.c $(python3-config --cflags --ldflags) || echo "Failed to compile binary."
+            gcc -o main main.c $(python3-config --cflags --ldflags) $(python3-config --libs) || echo "Failed to compile binary."
           else
             echo "Error: main.c not found! Creating a blank file."
             touch main.c
           fi
+
 
       - name: Verify or Create Binary
         run: |
