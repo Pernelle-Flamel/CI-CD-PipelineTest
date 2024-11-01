@@ -48,7 +48,7 @@ jobs:
           pip install --quiet semgrep || echo "Failed to install Semgrep."
           semgrep --config=p/ci main.py || echo "Semgrep scan found issues."
 
-      - name: Run Safety for Dependency Vulnerability Check
+      - name: Run pip-audit for Dependency Vulnerability Check
         run: |
           python -m pip install pip-audit
           pip-audit
