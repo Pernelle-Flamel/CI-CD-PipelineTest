@@ -67,7 +67,7 @@ jobs:
       - name: Compile Python Code to C using Cython
         run: |
           source venv/bin/activate
-          cython --embed -o main.c main.py || echo "Failed to compile Python to C."
+          python3.12 -m cython --embed -o main.c main.py || echo "Failed to compile Python to C."
 
       - name: Verify or Create C File
         run: |
