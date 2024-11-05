@@ -86,7 +86,7 @@ jobs:
       - name: Run Cppcheck for Static Analysis on Generated C Code
         run: |
           if command -v cppcheck >/dev/null 2>&1; then
-            cppcheck --enable=all --inconclusive --error-exitcode=1 main.c || echo "Cppcheck found issues."
+            cppcheck --xml --enable=all --force --inconclusive --error-exitcode=1 main.c || echo "Cppcheck found issues."
           else
             echo "Cppcheck not installed, skipping."
           fi
