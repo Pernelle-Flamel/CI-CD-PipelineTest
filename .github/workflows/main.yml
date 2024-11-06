@@ -93,7 +93,7 @@ jobs:
       - name: Run Flawfinder for Security Analysis on Generated C Code
         run: |
           sudo apt-get update -y && sudo apt-get install -y flawfinder || echo "Failed to install Flawfinder."
-          flawfinder main.c || echo "Flawfinder found issues."
+          flawfinder --context main.c || echo "Flawfinder found issues."
 
       - name: Compile C Code to Binary with GCC
         run: |
