@@ -1,6 +1,9 @@
 # Datei: buggy_code.pyx
 # Dieser Code enthält absichtlich Fehler, die nach der Übersetzung in C++ sichtbar werden.
-
+import sys
+if sys.version_info < (3, 3):
+    raise RuntimeError("Dieses Skript erfordert Python 3.3 oder höher.")
+    
 def multiply(a, b):
     # Fehler 1: Uninitialisierte Variable
     result = None  # 'result' wird nicht korrekt initialisiert
