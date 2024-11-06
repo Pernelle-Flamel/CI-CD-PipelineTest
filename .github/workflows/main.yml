@@ -76,20 +76,16 @@ jobs:
             touch main.c
           fi          
 
-      - name: Install Cppcheck if Not Available
+      - name: Install Clang if Not Available
         run: |
-          if ! command -v cppcheck >/dev/null 2>&1; then
-            echo "Cppcheck not found. Installing..."
-            sudo apt-get update -y && sudo apt-get install -y cppcheck
+          if ! command -v clang >/dev/null 2>&1; then
+            echo "Clang not found. Installing..."
+            sudo apt-get update -y && sudo apt-get install -y clang
           fi
 
-      - name: Run Cppcheck for Static Analysis on Generated C Code
+      - name: Run Clang Static Analyzer for Static Analysis on Generated C Code
         run: |
-          if command -v cppcheck >/dev/null 2>&1; then
-            cppcheck --enable=all --force --inconclusive --error-exitcode=1 -v main.c || echo "Cppcheck found issues."
-          else
-            echo "Cppcheck not installed, skipping."
-          fi
+          clang --analyze main.c || echo "Clang Static Analyzer found issues."
 
       - name: Run Flawfinder for Security Analysis on Generated C Code
         run: |
